@@ -1,22 +1,20 @@
 ## Implementation of the kMeans Clustering algorithm. 
-## Requires the name of the file, the number of clusters, and maximum number of iteration.
-
+##
+## Input requirements:   the name of the file, the number of clusters, and maximum number of iteration.
+##   dataFile: filename of data to cluster
+##   k:        number of clusters to use
+##   maxIter:  maximum clustering iterations
+##   epsilon:  threshold used to classify significant changes in cluster means
+##
 ## Josh Tan
 ## CSCI 479
 ## 11/14/13
 
-## use Lecture 13
-
-## hints:
-## 1. follow Algorithm 13.1 in the book
-## 2. to choose k random centers, use the sample function in R
-
 ## INPUT VARIABLES
-dataFile = "kMeansDataset/twoCircles.txt"  # input filename
-k = 2                                        # number of clusters
-maxIter = 20                                 # max iterations
-epsilon = 0.00001                            # difference threshold
-
+dataFile = "kMeansDataset/twoCircles.txt"
+k = 3
+maxIter = 20
+epsilon = 0.001
 
 centroidDists <- function(X, c) {
     ## what does
@@ -28,26 +26,32 @@ centroidDists <- function(X, c) {
     ## Returns:
     ##   What returned.
     dists = apply(X, 1, function(point)
-        sapply(1:ncol(c), function(dim)
+        sapply(1:nrow(c), function(dim)
               dist(rbind(point, c[dim, ]))))
     return(t(dists))
 }
 
-assignClusters <- function(cDists) {
-
+assignClusters <- function(X, c) {
+    ## what does
+    ##
+    ## Args:
+    ##   X: what X
+    ##   c: what c. 
+    ##      centroids
+    ## Returns:
+    ##   What returned.
+    cDists = centroidDists(X, c)
     clusterAndDist = sapply(1:n, function(x) which.min(cDists[x, ]))
     return(clusterAndDist)
 }
 
-    
-
 ## read data
 X = as.matrix(read.table(dataFile))
 
-## plot data
-
-
-plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])), ylim = c(min(X[ ,2]), max(X[ ,2])), xlab = "X", ylab = "Y", main = "Original Data", type = "n")
+## plot original data
+plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+     ylim = c(min(X[ ,2]), max(X[ ,2])),
+     xlab = "X", ylab = "Y", main = "Original Data", type = "n")
 points(X)
 
 ## determine number of points and dimensions in data
@@ -69,49 +73,52 @@ for(iter in 1:maxIter) { # as long max number of iterations has been reached.
 
   ## CLUSTER ASSIGNMENT STEP
 
-  ## Assign every point to the closest cluster mean.
-  
-  ## for every point, find its distances to all the cluster means.
-  centDists  = centroidDists(X, centroids)
-  clusters = assignClusters(centDists)
+  ## for every point, find its distances to all the cluster means and assign
+  ## the point to its nearest cluster mean
+  clusters = assignClusters(X, centroids)
 
-  ## plot
+  ## plot points (colored by cluster) and centroids
   plotTitle = sprintf("Iteration %d", iter)
-  plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])), ylim = c(min(X[ ,2]), max(X[ ,2])), xlab = "X", ylab = "Y", main = plotTitle , type = "n")
+  plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+       ylim = c(min(X[ ,2]), max(X[ ,2])),
+       xlab = "X", ylab = "Y", main = plotTitle , type = "n")
+  points(X, col=clusters + 1)
   points(centroids, col="black", cex=5)
-  points(X[which(clusters == 1), ], col="red")
-  points(X[which(clusters == 2), ], col="blue")
-
 
   ## CENTROID UPDATE STEP
-
-  ## for every cluster, calculate the new means,,
 
   ## Using for loop
   ## for (c in 1:k) {
   ##     centroids[c, ] = colMeans(X[which(clusters == c), ])
   ## }
 
-  centroids = t(sapply(1:k, function(c) colMeans(X[which(clusters == c), ])))
+  ## for every cluster, calculate its new centroid
+  newCentroids = t(sapply(1:k, function(c) colMeans(X[which(clusters == c), ])))
 
   ## CHECK IF CHANGE IN CENTROIDS IS SIGNIFICANT
 
-  ## See if the means of the clusters changed .
-  ## Calculate the delta, the sum of the differences between the old means and the new means..
-  ## Check if delta is less than epsilon, if so break from the loop..
-  ## if not, break from loop
+  delta = sum((newCentroids - centroids) ^ 2)
+  cat("Delta:", delta, "\n")
 
+  if (delta > epsilon) {
 
-  
+      ## use new centroids for next iteration
+      centroids = newCentroids
 
-
-  ## Wait for user input
-  invisible(readline(prompt="Press [enter] to perform next iteration."))
+      ## Wait for user input (if need to)
+      invisible(readline(prompt="Press [enter] to perform next iteration."))
+  } else {
+      break
+  }
 
 }
 
-## myCluster should have the final clustering assignments, which cluster every point is assigned to..
-##plot(X,col = myCluster) 
+## plot final clustering
+plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+     ylim = c(min(X[ ,2]), max(X[ ,2])),
+     xlab = "X", ylab = "Y", main = "Final Clustering" , type = "n")
+points(X, col = clusters + 1)
+points(centroids, col="black", cex=5)
 
 ## print output:
 ## 1. final mean and size for each cluster
