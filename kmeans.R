@@ -17,17 +17,25 @@ k = 2                                        # number of clusters
 maxIter = 20                                 # max iterations
 epsilon = 0.00001                            # difference threshold
 
-distToMeans <- function(X, m) {
-        
-    dist = apply(X, 1, function(x)
-        sapply(1:ncol(m), function(y)
-              dist(rbind(x, m[y]))))
-    return(dist)
+
+centroidDists <- function(X, c) {
+    ## what does
+    ##
+    ## Args:
+    ##   X: what X
+    ##   c: what c. 
+    ##      centroids
+    ## Returns:
+    ##   What returned.
+    dists = apply(X, 1, function(point)
+        sapply(1:ncol(c), function(dim)
+              dist(rbind(point, c[dim, ]))))
+    return(t(dists))
 }
 
-assignClusters <- function(meanDists) {
+assignClusters <- function(cDists) {
 
-    clusterAndDist = sapply(1:n, function(x) list(which.min(meanDists[, x]), min(meanDists[, x]))) # TODO: rotate this output 
+    clusterAndDist = sapply(1:n, function(x) which.min(cDists[x, ]))
     return(clusterAndDist)
 }
 
@@ -38,6 +46,7 @@ X = as.matrix(read.table(dataFile))
 
 ## plot data
 
+
 plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])), ylim = c(min(X[ ,2]), max(X[ ,2])), xlab = "X", ylab = "Y", main = "Original Data", type = "n")
 points(X)
 
@@ -47,45 +56,56 @@ d = dim(X)[2]
 
 ## select k random points for initial means
 ids = sample(1:n, k)
-means = X[ids, ]
+centroids = X[ids, ] # centroids
 
 ## initialize cluster assignments for points
-myCluster = matrix(0, 1, n)
+clusters = matrix(0, 1, n)
 
 invisible(readline(prompt="Press [enter] to begin clustering."))
 
 for(iter in 1:maxIter) { # as long max number of iterations has been reached.
   
   cat("Iteration ", iter, ".\n", sep = "")
+
+  ## CLUSTER ASSIGNMENT STEP
+
+  ## Assign every point to the closest cluster mean.
   
   ## for every point, find its distances to all the cluster means.
-  meanDists  = distToMeans(X, means)
-  clusterAndDist = assignClusters(meanDists)
+  centDists  = centroidDists(X, centroids)
+  clusters = assignClusters(centDists)
 
   ## plot
-  plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])), ylim = c(min(X[ ,2]), max(X[ ,2])), xlab = "X", ylab = "Y", main = "Iteration" , type = "n")
-  points(means, col="black", cex=5)
-  points(X[which(clusterAndDist[1, ] == 1), ], col="red")
-  points(X[which(clusterAndDist[1, ] == 2), ], col="blue")
+  plotTitle = sprintf("Iteration %d", iter)
+  plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])), ylim = c(min(X[ ,2]), max(X[ ,2])), xlab = "X", ylab = "Y", main = plotTitle , type = "n")
+  points(centroids, col="black", cex=5)
+  points(X[which(clusters == 1), ], col="red")
+  points(X[which(clusters == 2), ], col="blue")
 
 
-  for (m in 1:k) {
-      means[k, ] = colMeans(X[which(clusterAndDist[1, ] == k), ])
-  }
-  
-#  for (p in 1:n) {
-      
-#  }   
-  ## Assign every point to the closest cluster mean.
+  ## CENTROID UPDATE STEP
 
-  
   ## for every cluster, calculate the new means,,
-  
+
+  ## Using for loop
+  ## for (c in 1:k) {
+  ##     centroids[c, ] = colMeans(X[which(clusters == c), ])
+  ## }
+
+  centroids = t(sapply(1:k, function(c) colMeans(X[which(clusters == c), ])))
+
+  ## CHECK IF CHANGE IN CENTROIDS IS SIGNIFICANT
+
   ## See if the means of the clusters changed .
   ## Calculate the delta, the sum of the differences between the old means and the new means..
-
   ## Check if delta is less than epsilon, if so break from the loop..
+  ## if not, break from loop
 
+
+  
+
+
+  ## Wait for user input
   invisible(readline(prompt="Press [enter] to perform next iteration."))
 
 }
