@@ -11,8 +11,8 @@
 ## 11/14/13
 
 ## INPUT VARIABLES
-dataFile = "kMeansDataset/twoCircles.txt"
-k = 3
+dataFile = "kMeansDataset/fourCircles.txt"
+k = 4
 maxIter = 20
 epsilon = 0.001
 
@@ -45,14 +45,44 @@ assignClusters <- function(X, c) {
     return(clusterAndDist)
 }
 
+plotData <- function(X, title, centroids = NULL, clusters = NULL) {
+    if (ncol(X) > 2) {
+        ## should use scatterplot matrix
+        if (!is.null(centroids) & !is.null(clusters)) {
+            ## plot data colored by cluster, along with centroids
+            pairsCol = append(clusters + 1, vector(mode="numeric", length=nrow(centroids)) + 1)
+            pairsCex = append(vector(mode="numeric", length=length(clusters)) + 1, vector(mode="numeric", length=nrow(centroids)) + 2)
+            pairs(rbind(X, centroids), col=pairsCol, cex = pairsCex)
+        } else {
+            ## plot original data
+            pairs(X)
+        }
+    } else {
+        ## should use 2D plot
+        plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+             ylim = c(min(X[ ,2]), max(X[ ,2])),
+             xlab = "X", ylab = "Y", main = title, type = "n")
+        if (!is.null(centroids) & !is.null(clusters)) {
+            ## plot data colored by cluster, along with centroids
+            points(X, col=clusters + 1)
+            points(centroids, col="black", cex=5)
+        } else {
+            ## plot original data
+            points(X)
+        }
+    }
+}
+
 ## read data
 X = as.matrix(read.table(dataFile))
 
 ## plot original data
-plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-     ylim = c(min(X[ ,2]), max(X[ ,2])),
-     xlab = "X", ylab = "Y", main = "Original Data", type = "n")
-points(X)
+plotData(X, "Original Data")
+
+## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+##      ylim = c(min(X[ ,2]), max(X[ ,2])),
+##      xlab = "X", ylab = "Y", main = "Original Data", type = "n")
+## points(X)
 
 ## determine number of points and dimensions in data
 n = dim(X)[1]
@@ -79,11 +109,13 @@ for(iter in 1:maxIter) { # as long max number of iterations has been reached.
 
   ## plot points (colored by cluster) and centroids
   plotTitle = sprintf("Iteration %d", iter)
-  plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-       ylim = c(min(X[ ,2]), max(X[ ,2])),
-       xlab = "X", ylab = "Y", main = plotTitle , type = "n")
-  points(X, col=clusters + 1)
-  points(centroids, col="black", cex=5)
+  plotData(X, plotTitle, centroids, clusters)
+
+  ## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+  ##      ylim = c(min(X[ ,2]), max(X[ ,2])),
+  ##      xlab = "X", ylab = "Y", main = plotTitle , type = "n")
+  ## points(X, col=clusters + 1)
+  ## points(centroids, col="black", cex=5)
 
   ## CENTROID UPDATE STEP
 
@@ -106,7 +138,9 @@ for(iter in 1:maxIter) { # as long max number of iterations has been reached.
       centroids = newCentroids
 
       ## Wait for user input (if need to)
-      invisible(readline(prompt="Press [enter] to perform next iteration."))
+      if (iter != maxIter) {
+          invisible(readline(prompt="Press [enter] to perform next iteration."))
+      }
   } else {
       break
   }
@@ -114,11 +148,17 @@ for(iter in 1:maxIter) { # as long max number of iterations has been reached.
 }
 
 ## plot final clustering
-plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-     ylim = c(min(X[ ,2]), max(X[ ,2])),
-     xlab = "X", ylab = "Y", main = "Final Clustering" , type = "n")
-points(X, col = clusters + 1)
-points(centroids, col="black", cex=5)
+plotData(X, "Final Clustering", centroids, clusters)
+
+## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
+##      ylim = c(min(X[ ,2]), max(X[ ,2])),
+##      xlab = "X", ylab = "Y", main = "Final Clustering" , type = "n")
+## points(X, col = clusters + 1)
+## points(centroids, col="black", cex=5)
+
+## pairsCol = append(clusters + 1, vector(mode="numeric", length=nrow(centroids)) + 1)
+## pairsCex = append(vector(mode="numeric", length=length(clusters)) + 1, vector(mode="numeric", length=nrow(centroids)) + 2)
+## pairs(rbind(X, centroids), col=pairsCol, cex = pairsCex)
 
 ## print output:
 ## 1. final mean and size for each cluster
@@ -126,3 +166,15 @@ points(centroids, col="black", cex=5)
 ##    e.g. for 7 points with C1 = {p1,p4,p5} and C2 = {p2,p3,p6,p7}, the output should be
 ##    1,2,2,1,1,2,2
 ## 3. number of iterations, the final delta
+cat("\nClustering finished.\n\n")
+for (c in 1:nrow(centroids)) {
+    cat("Cluster ", c, ":\n", sep="")
+    cat("\tMean:", paste(centroids[c,], collapse = ", "), "\n")
+    cat("\tSize:", length(which(clusters == c)), "\n")
+}
+
+cat("\nIteration Count:", iter, "\n")
+cat("Final Delta:", delta, "\n")
+
+invisible(readline(prompt="\nPress [enter] to print cluster assignments.\n"))
+cat("Cluster Assignments:\n", clusters, "\n")
