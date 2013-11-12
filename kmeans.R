@@ -17,14 +17,18 @@ maxIter = 20
 epsilon = 0.001
 
 centroidDists <- function(X, c) {
-    ## what does
+    ## For each row in the input data, find its Euclidean distance to
+    ## each of the centroids.
     ##
     ## Args:
-    ##   X: what X
-    ##   c: what c. 
-    ##      centroids
+    ##   X: input data matrix, where each row represents a point
+    ##   c: centroid matrix, where each row represents a centroid
     ## Returns:
-    ##   What returned.
+    ##   A matrix with the same number of rows as X and the same number
+    ##   of columns as c. The rows correspond to the points in
+    ##   X and the columns correspond to the centroids. The value
+    ##   for a particular (row, col) is the Euclidean distance
+    ##   for the corresponding (point, centroid).
     dists = apply(X, 1, function(point)
         sapply(1:nrow(c), function(dim)
               dist(rbind(point, c[dim, ]))))
@@ -32,30 +36,47 @@ centroidDists <- function(X, c) {
 }
 
 assignClusters <- function(X, c) {
-    ## what does
+    ## Assign the points in the input data to its closest centroid,
+    ## using Euclidean distances.
     ##
     ## Args:
-    ##   X: what X
-    ##   c: what c. 
-    ##      centroids
+    ##   X: input data matrix, where each row represents a point
+    ##   c: centroid matrix, where each row represents a centroid 
     ## Returns:
-    ##   What returned.
+    ##   A vector with the same number of rows as X. The value for
+    ##   a given index in this vector is indicates the cluster
+    ##   centered at at c[index, ].
     cDists = centroidDists(X, c)
     clusterAndDist = sapply(1:n, function(x) which.min(cDists[x, ]))
     return(clusterAndDist)
 }
 
 plotData <- function(X, title, centroids = NULL, clusters = NULL) {
+    ## Plot the data. The pairs() function is used if the data
+    ## has more than 2 dimensions. Otherwise, the plot() function
+    ## is used. If centroid and clustering data is provided,
+    ## also draw these on the same plot(s).
+    ##
+    ## Args:
+    ##   X: input data matrix, where each row represents a point
+    ##   title: title to use for the plot
+    ##   centroids: centroid matrix, where each row represents a centroid
+    ##   clusters: vector of cluster assignments, corresponding to the
+    ##             rows in centroids
+    ## Returns:
+    ##   Nothing.
     if (ncol(X) > 2) {
         ## should use scatterplot matrix
         if (!is.null(centroids) & !is.null(clusters)) {
             ## plot data colored by cluster, along with centroids
-            pairsCol = append(clusters + 1, vector(mode="numeric", length=nrow(centroids)) + 1)
-            pairsCex = append(vector(mode="numeric", length=length(clusters)) + 1, vector(mode="numeric", length=nrow(centroids)) + 2)
-            pairs(rbind(X, centroids), col=pairsCol, cex = pairsCex)
+            pairsCol = append(clusters + 1,
+                vector(mode = "numeric", length = nrow(centroids)) + 1)
+            pairsCex = append(vector(mode = "numeric", length = length(clusters)) + 1,
+                vector(mode = "numeric", length = nrow(centroids)) + 2)
+            pairs(rbind(X, centroids), main = title, col = pairsCol, cex = pairsCex)
         } else {
             ## plot original data
-            pairs(X)
+            pairs(X, main = title)
         }
     } else {
         ## should use 2D plot
@@ -64,8 +85,8 @@ plotData <- function(X, title, centroids = NULL, clusters = NULL) {
              xlab = "X", ylab = "Y", main = title, type = "n")
         if (!is.null(centroids) & !is.null(clusters)) {
             ## plot data colored by cluster, along with centroids
-            points(X, col=clusters + 1)
-            points(centroids, col="black", cex=5)
+            points(X, col = clusters + 1)
+            points(centroids, col = "black", cex = 5)
         } else {
             ## plot original data
             points(X)
@@ -79,25 +100,20 @@ X = as.matrix(read.table(dataFile))
 ## plot original data
 plotData(X, "Original Data")
 
-## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-##      ylim = c(min(X[ ,2]), max(X[ ,2])),
-##      xlab = "X", ylab = "Y", main = "Original Data", type = "n")
-## points(X)
-
 ## determine number of points and dimensions in data
 n = dim(X)[1]
 d = dim(X)[2]
 
 ## select k random points for initial means
 ids = sample(1:n, k)
-centroids = X[ids, ] # centroids
+centroids = X[ids, ]
 
 ## initialize cluster assignments for points
 clusters = matrix(0, 1, n)
 
-invisible(readline(prompt="Press [enter] to begin clustering."))
+invisible(readline(prompt = "Press [enter] to begin clustering."))
 
-for(iter in 1:maxIter) { # as long max number of iterations has been reached.
+for(iter in 1:maxIter) {
   
   cat("Iteration ", iter, ".\n", sep = "")
 
@@ -111,70 +127,41 @@ for(iter in 1:maxIter) { # as long max number of iterations has been reached.
   plotTitle = sprintf("Iteration %d", iter)
   plotData(X, plotTitle, centroids, clusters)
 
-  ## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-  ##      ylim = c(min(X[ ,2]), max(X[ ,2])),
-  ##      xlab = "X", ylab = "Y", main = plotTitle , type = "n")
-  ## points(X, col=clusters + 1)
-  ## points(centroids, col="black", cex=5)
-
   ## CENTROID UPDATE STEP
-
-  ## Using for loop
-  ## for (c in 1:k) {
-  ##     centroids[c, ] = colMeans(X[which(clusters == c), ])
-  ## }
 
   ## for every cluster, calculate its new centroid
   newCentroids = t(sapply(1:k, function(c) colMeans(X[which(clusters == c), ])))
 
-  ## CHECK IF CHANGE IN CENTROIDS IS SIGNIFICANT
-
+  ## check if change in centroids is significant
   delta = sum((newCentroids - centroids) ^ 2)
   cat("Delta:", delta, "\n")
 
   if (delta > epsilon) {
-
       ## use new centroids for next iteration
       centroids = newCentroids
 
       ## Wait for user input (if need to)
       if (iter != maxIter) {
-          invisible(readline(prompt="Press [enter] to perform next iteration."))
+          invisible(readline(prompt = "Press [enter] to perform next iteration."))
       }
   } else {
       break
   }
-
 }
 
 ## plot final clustering
 plotData(X, "Final Clustering", centroids, clusters)
 
-## plot(NULL, NULL, xlim = c(min(X[ ,1]), max(X[ ,1])),
-##      ylim = c(min(X[ ,2]), max(X[ ,2])),
-##      xlab = "X", ylab = "Y", main = "Final Clustering" , type = "n")
-## points(X, col = clusters + 1)
-## points(centroids, col="black", cex=5)
-
-## pairsCol = append(clusters + 1, vector(mode="numeric", length=nrow(centroids)) + 1)
-## pairsCex = append(vector(mode="numeric", length=length(clusters)) + 1, vector(mode="numeric", length=nrow(centroids)) + 2)
-## pairs(rbind(X, centroids), col=pairsCol, cex = pairsCex)
-
 ## print output:
-## 1. final mean and size for each cluster
-## 2. final cluster assignment of all the points, along with which lcuster each point is assigned to
-##    e.g. for 7 points with C1 = {p1,p4,p5} and C2 = {p2,p3,p6,p7}, the output should be
-##    1,2,2,1,1,2,2
-## 3. number of iterations, the final delta
 cat("\nClustering finished.\n\n")
 for (c in 1:nrow(centroids)) {
-    cat("Cluster ", c, ":\n", sep="")
-    cat("\tMean:", paste(centroids[c,], collapse = ", "), "\n")
+    cat("Cluster ", c, ":\n", sep = "")
+    cat("\tMean:", paste(centroids[c, ], collapse = ", "), "\n")
     cat("\tSize:", length(which(clusters == c)), "\n")
 }
 
 cat("\nIteration Count:", iter, "\n")
 cat("Final Delta:", delta, "\n")
 
-invisible(readline(prompt="\nPress [enter] to print cluster assignments.\n"))
+invisible(readline(prompt = "\nPress [enter] to print cluster assignments.\n"))
 cat("Cluster Assignments:\n", clusters, "\n")
