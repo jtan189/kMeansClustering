@@ -1,0 +1,145 @@
+\documentclass{report}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+
+\title{Assignment 3\\kMeans Clustering\\[1em]CSCI 479}
+\author{Josh Tan}
+\date{November 14, 2013}
+\setlength\parindent{0pt}
+
+\graphicspath{{Results/}}
+\DeclareGraphicsExtensions{.pdf}
+
+\begin{document}
+\maketitle
+
+\section*{twoCircles}
+
+\begin{verbatim}
+Cluster 1:
+        Mean: 3.99267174570399, 1.97062519340629 
+        Size: 1000 
+Cluster 2:
+        Mean: 4.05552650036302, 5.9599730477341 
+        Size: 1000 
+Iteration Count: 4 
+Final Delta: 0
+\end{verbatim}
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{twoCircles}
+%  \caption{Final clustering for twoCircles dataset.}
+\end{figure}
+
+\pagebreak
+
+\section*{fourCircles}
+
+\begin{verbatim}
+Cluster 1:
+        Mean: 3.05207118383164, 3.09147626141166 
+        Size: 500 
+Cluster 2:
+        Mean: 0.954808255061881, 3.08582099204835 
+        Size: 500 
+Cluster 3:
+        Mean: 0.974412348734461, 0.988705179423637 
+        Size: 500 
+Cluster 4:
+        Mean: 3.07441234873446, 0.988705179423637 
+        Size: 500 
+Iteration Count: 6 
+Final Delta: 0.0008994456 
+\end{verbatim}
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{fourCircles}
+%  \caption{Final clustering for fourCircles dataset.}
+\end{figure}
+
+\pagebreak
+
+\section*{twoEllipses}
+
+\begin{verbatim}
+Cluster 1:
+        Mean: 2.66714969798415, 4.59020220218321 
+        Size: 985 
+Cluster 2:
+        Mean: 5.19959310439594, 4.59612460134661 
+        Size: 1015 
+Iteration Count: 7 
+Final Delta: 0.0009776696 
+\end{verbatim}
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{twoEllipses}
+%  \caption{Final clustering for twoEllipses dataset.}
+\end{figure}
+
+\pagebreak
+
+\section*{iris}
+
+\begin{verbatim}
+Cluster 1:
+        Mean: 6.85384615384615, 3.07692307692308, 5.71538461538462, 2.05384615384615 
+        Size: 39 
+Cluster 2:
+        Mean: 5.006, 3.418, 1.464, 0.244 
+        Size: 50 
+Cluster 3:
+        Mean: 5.88360655737705, 2.74098360655738, 4.38852459016393, 1.4344262295082 
+        Size: 61 
+Iteration Count: 3 
+Final Delta: 0 
+\end{verbatim}
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[width=0.9\linewidth]{iris}
+%  \caption{Final clustering for iris dataset.}
+\end{figure}
+
+\pagebreak
+
+\section*{t4.8k}
+
+\begin{verbatim}
+Cluster 1:
+        Mean: 128.878859446888, 110.79153910676 
+        Size: 1864 
+Cluster 2:
+        Mean: 531.905322370123, 208.456487307692 
+        Size: 897 
+Cluster 3:
+        Mean: 393.100021033058, 234.425285651974 
+        Size: 1089 
+Cluster 4:
+        Mean: 341.628938318801, 96.8454311968665 
+        Size: 1468 
+Cluster 5:
+        Mean: 526.594384030047, 92.6984573173709 
+        Size: 1065 
+Cluster 6:
+        Mean: 206.521799135436, 227.93723994496 
+        Size: 1617 
+Iteration Count: 18 
+Final Delta: 0 
+\end{verbatim}
+
+\begin{figure}[htp!]
+  \centering
+  \includegraphics[width=0.78\linewidth]{t4_8k}
+%  \caption{Final clustering for t4.8k dataset.}
+\end{figure}
+
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
