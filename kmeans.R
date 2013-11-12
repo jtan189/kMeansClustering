@@ -11,8 +11,8 @@
 ## 11/14/13
 
 ## INPUT VARIABLES
-dataFile = "kMeansDataset/fourCircles.txt"
-k = 4
+dataFile = "kMeansDataset/twoEllipses.txt"
+k = 2
 maxIter = 20
 epsilon = 0.001
 
